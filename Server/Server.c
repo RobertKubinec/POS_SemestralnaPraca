@@ -77,7 +77,6 @@ int main(int argc, char *argv[]) {
 void *nacitaj(void *data) {
     DATA *d = data;
     int policko;
-//    int hodnota = 0;
 
     //citaj data od clienta
     while (d->vysledok == 0) {
