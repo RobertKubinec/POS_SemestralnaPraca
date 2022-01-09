@@ -108,12 +108,8 @@ void *nacitaj(void *data) {
             for (int i = 0; i < 9; ++i) {
                 if (*d->odpoved == d->hraciePole[i]) {
                     policko = i;
-//                    hodnota = 0;
                     break;
                 }
-//                else {
-//                    hodnota = -1;
-//                }
             }
             d->hraciePole[policko] = 'O';
 
