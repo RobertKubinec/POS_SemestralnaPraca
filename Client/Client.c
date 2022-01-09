@@ -38,8 +38,7 @@ int main(int argc, char *argv[]) {
         return 2;
     }
 
-    bzero((char *) &server_addr,
-          sizeof(server_addr)); //(bzero - vynuluje hodnotu) vunulujeme a zinicializujeme adresu, na ktoru sa budeme pripajat
+    bzero((char *) &server_addr, sizeof(server_addr)); //(bzero - vynuluje hodnotu) vunulujeme a zinicializujeme adresu, na ktoru sa budeme pripajat
     server_addr.sin_family = AF_INET;
     bcopy(              //kopiruje konkretne byty na specificku poziciu
             (char *) server->h_addr,  //zoebrie zo server h_addr
@@ -82,11 +81,13 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+/*
+ * Stara sa o prijimanie odpovede zo servera, zapisanie odpovede do hracieho pola.
+ *
+ */
 void *nacitaj(void *data) {
-    // read back from server
     DATA *d = data;
     int policko;
-//    int hodnota = 0;
 
     while (d->vysledok == 0) {
         pthread_mutex_lock(d->mutex);
@@ -119,9 +120,12 @@ void *nacitaj(void *data) {
             printf("-----------------------------------\n");
             printf("Server --> zadal 'O' na poziciu: %c\n", *d->odpoved);
             printf("-----------------------------------\n");
+
             (*d->pocetKrokov)++;
             d->vysledok = kontrola(d->hraciePole, 'O', *d->pocetKrokov);
+
             printf("Pocet krokov: %d\n", *d->pocetKrokov);
+
             pthread_cond_signal(d->cond_odosli);
         }
         pthread_mutex_unlock(d->mutex);
@@ -130,9 +134,12 @@ void *nacitaj(void *data) {
     return 0;
 }
 
+/*
+ * Stara sa o odosielanie odpovede na server, kontrolu vstupu hraca, zapisanie
+ * odpovede do hracieho pola.
+ * */
 void *odosli(void *data) {
     DATA *d = data;
-    // write data to server
     int policko;
     int hodnota = 0;
 
@@ -177,10 +184,11 @@ void *odosli(void *data) {
                 }
 
                 d->hraciePole[policko] = 'X';
-
-                (*d->pocetKrokov)++;
+                 (*d->pocetKrokov)++;
                 d->vysledok = kontrola(d->hraciePole, 'X', *d->pocetKrokov);
+
                 printf("Pocet krokov: %d\n", *d->pocetKrokov);
+
                 pthread_cond_signal(d->cond_nacitaj);
             }
         }
@@ -189,7 +197,9 @@ void *odosli(void *data) {
     return 0;
 }
 
-
+/*
+ * Vypisanie pola zadaneho ako vstupny parameter na obrazovku.
+ * */
 void zobraz(char pole[]) {
     printf("\t\t\t\t\t\t\t -------|-------|-------\n");
     printf("\t\t\t\t\t\t\t    %c   |   %c   |   %c   \n", pole[0], pole[1], pole[2]);
@@ -200,7 +210,7 @@ void zobraz(char pole[]) {
     printf("\t\t\t\t\t\t\t -------|-------|-------\n");
 }
 
-/**
+/*
  * Kontrola vyhry podla pravidiel Tic-Tac-Toe.
  * */
 int kontrola(char pole[], char ch, int pocetKrokov) {
@@ -233,7 +243,7 @@ int kontrola(char pole[], char ch, int pocetKrokov) {
     }
 }
 
-/**
+/*
  * Funkcia vrati dlzku stringu ktory sa zada ako vstupny parameter.
  * */
 int strlength(char *s) {
