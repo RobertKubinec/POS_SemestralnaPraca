@@ -134,3 +134,111 @@ void *nacitaj(void *data) {
     return 0;
 }
 
+void *odosli(void *data) {
+    DATA *d = data;
+    // write data to server
+    int policko;
+    int hodnota = 0;
+
+    while (d->vysledok == 0) {
+        pthread_mutex_lock(d->mutex);
+
+        if (hodnota == 0) {
+            zobraz(d->hraciePole);
+        }
+
+        while (*d->pocetKrokov % 2 == 1) {
+            pthread_cond_wait(d->cond_odosli, d->mutex);
+        }
+
+        if (d->vysledok == 0) {
+            printf("Zadaj svoj vyber - (1-9): \n");
+            fgets(d->odpoved, 256, stdin);
+
+            for (int i = 0; i < 9; ++i) {
+                if (*d->odpoved == d->hraciePole[i]) {
+                    policko = i;
+                    hodnota = 0;
+                    break;
+                } else {
+                    hodnota = -1;
+                }
+            }
+
+            if ((strlength(d->odpoved) - 1) > 1) {
+                hodnota = -1;
+            }
+
+            if (hodnota == -1) {
+                printf("!! Policko je uz obsadene alebo si nezadal hodnotu z intervalu - (1-9) !!\n");
+                printf("Zadaj hodnotu v platnom intervale!\n");
+            } else {
+                int n = write(*d->socket, d->odpoved, strlen(d->odpoved));
+
+                if (n < 0) {
+                    printf("Error writin\n");
+                    exit(1);
+                }
+
+                d->hraciePole[policko] = 'X';
+
+                (*d->pocetKrokov)++;
+                d->vysledok = kontrola(d->hraciePole, 'X', *d->pocetKrokov);
+                printf("Pocet krokov: %d\n", *d->pocetKrokov);
+                pthread_cond_signal(d->cond_nacitaj);
+            }
+        }
+        pthread_mutex_unlock(d->mutex);
+    }
+    return 0;
+}
+
+
+void zobraz(char pole[]) {
+    printf("\t\t\t\t\t\t\t -------|-------|-------\n");
+    printf("\t\t\t\t\t\t\t    %c   |   %c   |   %c   \n", pole[0], pole[1], pole[2]);
+    printf("\t\t\t\t\t\t\t -------|-------|-------\n");
+    printf("\t\t\t\t\t\t\t    %c   |   %c   |   %c   \n", pole[3], pole[4], pole[5]);
+    printf("\t\t\t\t\t\t\t -------|-------|-------\n");
+    printf("\t\t\t\t\t\t\t    %c   |   %c   |   %c   \n", pole[6], pole[7], pole[8]);
+    printf("\t\t\t\t\t\t\t -------|-------|-------\n");
+}
+
+
+int kontrola(char pole[], char ch, int pocetKrokov) {
+    // riadok
+    for (int i = 0; i < 3; ++i) {
+        if (pole[i * 3] == ch && pole[i * 3 + 1] == ch && pole[i * 3 + 2] == ch) {
+            printf("Vyhral hrac: %c - %s\n", ch, pocetKrokov % 2 == 0 ? "Server" : "Client");
+            return pocetKrokov % 2 + 1;
+        }
+    }
+    // stlpec
+    for (int i = 0; i < 3; ++i) {
+        if (pole[i] == ch && pole[i + 3] == ch && pole[i + 6] == ch) {
+            printf("Vyhral hrac: %c - %s\n", ch, pocetKrokov % 2 == 0 ? "Server" : "Client");
+            return pocetKrokov % 2 + 1;
+        }
+    }
+    if (pole[0] == ch && pole[4] == ch && pole[8] == ch) {
+        printf("Vyhral hrac: %c - %s\n", ch, pocetKrokov % 2 == 0 ? "Server" : "Client");
+        return pocetKrokov % 2 + 1;
+    } else if (pole[2] == ch && pole[4] == ch && pole[6] == ch) {
+        printf("Vyhral hrac: %c - %s\n", ch, pocetKrokov % 2 == 0 ? "Server" : "Client");
+        return pocetKrokov % 2 + 1;
+    } else if (pocetKrokov == 9) {
+        printf("Remiza!\n");
+        return 3;
+    } else {
+        return 0;
+    }
+}
+
+int strlength(char *s) {
+    int c = 0;
+    while (*s != '\0') {
+        c++;
+        s++;
+    }
+    return c;
+}
