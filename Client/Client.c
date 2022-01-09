@@ -22,14 +22,13 @@ int main(int argc, char *argv[]) {
     portno = atoi(argv[2]);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
-    // check if socket is created properly
+    // kontrola ci sa socket vytvoril uspesne
     if (sockfd < 0) {
-        printf("Error opening socket!\n");
+        printf("Error creating socket!\n");
         exit(1);
     }
 
     // vytvorenie struckruty pre server address
-
     server = gethostbyname(
             argv[1]); // pouzijeme funkciu gethostbyname na ziskanie informacii o pocitaci, ktoreho hostname je v prvom argumente
     if (server == NULL)                     //gethostbyname - zisti specificke info o servery
@@ -47,9 +46,7 @@ int main(int argc, char *argv[]) {
     );
     server_addr.sin_port = htons(portno); // nastavenie portu //htons - transformacia z little endian na big endian
 
-
-
-    // connect to server
+    // pripojenie na server
     if (connect(sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr)) < 0) {
         printf("Connection failed!\n");
         exit(1);
