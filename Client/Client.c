@@ -68,11 +68,12 @@ int main(int argc, char *argv[]) {
     pthread_join(vlaknoOdosli, NULL);
     pthread_join(vlaknoNacitaj, NULL);
 
-
+    // destroy
     pthread_mutex_destroy(&mut);
     pthread_cond_destroy(&cond_odosli);
     pthread_cond_destroy(&cond_nacitaj);
 
+    // close socket
     close(sockfd);
 
     return 0;
@@ -80,7 +81,6 @@ int main(int argc, char *argv[]) {
 
 /*
  * Stara sa o prijimanie odpovede zo servera, zapisanie odpovede do hracieho pola.
- *
  */
 void *nacitaj(void *data) {
     DATA *d = data;
@@ -103,6 +103,8 @@ void *nacitaj(void *data) {
                 exit(1);
             }
 
+            // prehlada hracie pole ak sa znak zhodu zo vstupo tak ulozi
+            // di policka i na ktorom bol zhodny znak
             for (int i = 0; i < 9; ++i) {
                 if (*d->odpoved == d->hraciePole[i]) {
                     policko = i;

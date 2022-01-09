@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
     pthread_join(vlaknoOdosli, NULL);
     pthread_join(vlaknoNacitaj, NULL);
 
+    // destroy
     pthread_mutex_destroy(&mut);
     pthread_cond_destroy(&cond_odosli);
     pthread_cond_destroy(&cond_nacitaj);
@@ -74,11 +75,13 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+/*
+ * Stara sa o prijimanie odpovede zo servera, zapisanie odpovede do hracieho pola.
+ */
 void *nacitaj(void *data) {
     DATA *d = data;
     int policko;
 
-    //citaj data od clienta
     while (d->vysledok == 0) {
         pthread_mutex_lock(d->mutex);
         bzero(d->odpoved, 256); // clear buffer
@@ -99,12 +102,8 @@ void *nacitaj(void *data) {
             for (int i = 0; i < 9; ++i) {
                 if (*d->odpoved == d->hraciePole[i]) {
                     policko = i;
-//                    hodnota = 0;
                     break;
                 }
-//                else {
-//                    hodnota = -1;
-//                }
             }
             d->hraciePole[policko] = 'X';
 
@@ -113,9 +112,12 @@ void *nacitaj(void *data) {
             printf("-----------------------------------\n");
             printf("Client --> zadal 'X' na poziciu: %c\n", *d->odpoved);
             printf("-----------------------------------\n");
+
             (*d->pocetKrokov)++;
             d->vysledok = kontrola(d->hraciePole, 'X', *d->pocetKrokov);
+
             printf("Pocet krokov: %d\n", *d->pocetKrokov);
+
             pthread_cond_signal(d->cond_odosli);
         }
         pthread_mutex_unlock(d->mutex);
@@ -123,9 +125,13 @@ void *nacitaj(void *data) {
     return 0;
 }
 
+/*
+ * Stara sa o odosielanie odpovede na server, kontrolu vstupu hraca, zapisanie
+ * odpovede do hracieho pola.
+ * */
 void *odosli(void *data) {
     DATA *d = data;
-    // msg to client from server
+
     int policko;
     int hodnota = 0;
 
@@ -144,6 +150,9 @@ void *odosli(void *data) {
             printf("Zadaj svoj vyber - (1-9): \n");
             fgets(d->odpoved, 256, stdin);
 
+            // prehlada hracie pole ak sa znak zhodu zo vstupo tak ulozi
+            // do policka i na ktorom bol zhodny znak a nastavi hodnotu na 0
+            // inak -1
             for (int i = 0; i < 9; ++i) {
                 if (*d->odpoved == d->hraciePole[i]) {
                     policko = i;
@@ -154,10 +163,14 @@ void *odosli(void *data) {
                 }
             }
 
+            // ak vstup bol dlhsi ako 1 znak tak nastavi hodnotu na -1
             if ((strlength(d->odpoved) - 1) > 1) {
                 hodnota = -1;
             }
 
+            // ak bola nastavena hodnota na -1 (zly vstup) vypise sa upozornenie
+            // a vyzva na zadanie spravnej hodnoty
+            // inak sa hodnota zapisa do hracieho pola a odosle na server
             if (hodnota == -1) {
                 printf("Policko je uz obsadene alebo si nezadal hodnotu z intervalu - (1-9)!\n");
                 printf("Zadaj hodnotu v platnom intervale!\n");
@@ -172,7 +185,9 @@ void *odosli(void *data) {
                 d->hraciePole[policko] = 'O';
                 (*d->pocetKrokov)++;
                 d->vysledok = kontrola(d->hraciePole, 'O', *d->pocetKrokov);
+
                 printf("Pocet krokov: %d\n", *d->pocetKrokov);
+
                 pthread_cond_signal(d->cond_nacitaj);
             }
         }
@@ -181,6 +196,9 @@ void *odosli(void *data) {
     return 0;
 }
 
+/*
+ * Vypisanie pola zadaneho ako vstupny parameter na obrazovku.
+ * */
 void zobraz(char pole[]) {
     printf("\t\t\t\t\t\t\t -------|-------|-------\n");
     printf("\t\t\t\t\t\t\t    %c   |   %c   |   %c   \n", pole[0], pole[1], pole[2]);
@@ -191,21 +209,25 @@ void zobraz(char pole[]) {
     printf("\t\t\t\t\t\t\t -------|-------|-------\n");
 }
 
+/*
+ * Kontrola vyhry podla pravidiel Tic-Tac-Toe.
+ * */
 int kontrola(char pole[], char ch, int pocetKrokov) {
-    // riadok
+    // kontrola riadok
     for (int i = 0; i < 3; ++i) {
         if (pole[i * 3] == ch && pole[i * 3 + 1] == ch && pole[i * 3 + 2] == ch) {
             printf("Vyhral hrac %c: - %s\n", ch, pocetKrokov % 2 == 0 ? "Server" : "Client");
             return pocetKrokov % 2 + 1;
         }
     }
-    // stlpec
+    // kontrola stlpec
     for (int i = 0; i < 3; ++i) {
         if (pole[i] == ch && pole[i + 3] == ch && pole[i + 6] == ch) {
             printf("Vyhral hrac %c: - %s\n", ch, pocetKrokov % 2 == 0 ? "Server" : "Client");
             return pocetKrokov % 2 + 1;
         }
     }
+    // kontrola diagonal
     if (pole[0] == ch && pole[4] == ch && pole[8] == ch) {
         printf("Vyhral hrac: %c - %s\n", ch, pocetKrokov % 2 == 0 ? "Server" : "Client");
         return pocetKrokov % 2 + 1;
@@ -220,6 +242,9 @@ int kontrola(char pole[], char ch, int pocetKrokov) {
     }
 }
 
+/*
+ * Funkcia vrati dlzku stringu ktory sa zada ako vstupny parameter.
+ * */
 int strlength(char *s) {
     int c = 0;
     while (*s != '\0') {
