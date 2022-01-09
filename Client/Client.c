@@ -200,22 +200,25 @@ void zobraz(char pole[]) {
     printf("\t\t\t\t\t\t\t -------|-------|-------\n");
 }
 
-
+/**
+ * Kontrola vyhry podla pravidiel Tic-Tac-Toe.
+ * */
 int kontrola(char pole[], char ch, int pocetKrokov) {
-    // riadok
+    // kontrola riadok
     for (int i = 0; i < 3; ++i) {
         if (pole[i * 3] == ch && pole[i * 3 + 1] == ch && pole[i * 3 + 2] == ch) {
             printf("Vyhral hrac: %c - %s\n", ch, pocetKrokov % 2 == 0 ? "Server" : "Client");
             return pocetKrokov % 2 + 1;
         }
     }
-    // stlpec
+    // kontrola stlpec
     for (int i = 0; i < 3; ++i) {
         if (pole[i] == ch && pole[i + 3] == ch && pole[i + 6] == ch) {
             printf("Vyhral hrac: %c - %s\n", ch, pocetKrokov % 2 == 0 ? "Server" : "Client");
             return pocetKrokov % 2 + 1;
         }
     }
+    // kontrola diagonal
     if (pole[0] == ch && pole[4] == ch && pole[8] == ch) {
         printf("Vyhral hrac: %c - %s\n", ch, pocetKrokov % 2 == 0 ? "Server" : "Client");
         return pocetKrokov % 2 + 1;
@@ -230,6 +233,9 @@ int kontrola(char pole[], char ch, int pocetKrokov) {
     }
 }
 
+/**
+ * Funkcia vrati dlzku stringu ktory sa zada ako vstupny parameter.
+ * */
 int strlength(char *s) {
     int c = 0;
     while (*s != '\0') {
