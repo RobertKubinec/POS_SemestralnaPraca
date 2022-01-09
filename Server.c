@@ -124,7 +124,63 @@ void *nacitaj(void *data) {
     return 0;
 }
 
+void *odosli(void *data) {
+    DATA *d = data;
+    // msg to client from server
+    int policko;
+    int hodnota = 0;
 
+    while (d->vysledok == 0) {
+        pthread_mutex_lock(d->mutex);
+
+        if (hodnota == 0) {
+            zobraz(d->hraciePole);
+        }
+
+        while (*d->pocetKrokov % 2 == 0) {
+            pthread_cond_wait(d->cond_odosli, d->mutex);
+        }
+
+        if (d->vysledok == 0) {
+            printf("Zadaj svoj vyber - (1-9): \n");
+            fgets(d->odpoved, 256, stdin);
+
+            for (int i = 0; i < 9; ++i) {
+                if (*d->odpoved == d->hraciePole[i]) {
+                    policko = i;
+                    hodnota = 0;
+                    break;
+                } else {
+                    hodnota = -1;
+                }
+            }
+
+            if ((strlength(d->odpoved) - 1) > 1) {
+                hodnota = -1;
+            }
+
+            if (hodnota == -1) {
+                printf("Policko je uz obsadene alebo si nezadal hodnotu z intervalu - (1-9)!\n");
+                printf("Zadaj hodnotu v platnom intervale!\n");
+            } else {
+                int n = write(*d->socket, d->odpoved, strlen(d->odpoved));
+
+                if (n < 0) {
+                    printf("Error writin\n");
+                    exit(1);
+                }
+
+                d->hraciePole[policko] = 'O';
+                (*d->pocetKrokov)++;
+                d->vysledok = kontrola(d->hraciePole, 'O', *d->pocetKrokov);
+                printf("Pocet krokov: %d\n", *d->pocetKrokov);
+                pthread_cond_signal(d->cond_nacitaj);
+            }
+        }
+        pthread_mutex_unlock(d->mutex);
+    }
+    return 0;
+}
 
 void zobraz(char pole[]) {
     printf("\t\t\t\t\t\t\t -------|-------|-------\n");
