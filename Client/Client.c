@@ -104,7 +104,7 @@ void *nacitaj(void *data) {
             }
 
             // prehlada hracie pole ak sa znak zhodu zo vstupo tak ulozi
-            // di policka i na ktorom bol zhodny znak
+            // do policka i na ktorom bol zhodny znak
             for (int i = 0; i < 9; ++i) {
                 if (*d->odpoved == d->hraciePole[i]) {
                     policko = i;
@@ -157,6 +157,9 @@ void *odosli(void *data) {
             printf("Zadaj svoj vyber - (1-9): \n");
             fgets(d->odpoved, 256, stdin);
 
+            // prehlada hracie pole ak sa znak zhodu zo vstupo tak ulozi
+            // do policka i na ktorom bol zhodny znak a nastavi hodnotu na 0
+            // inak -1
             for (int i = 0; i < 9; ++i) {
                 if (*d->odpoved == d->hraciePole[i]) {
                     policko = i;
@@ -167,10 +170,14 @@ void *odosli(void *data) {
                 }
             }
 
+            // ak vstup bol dlhsi ako 1 znak tak nastavi hodnotu na -1
             if ((strlength(d->odpoved) - 1) > 1) {
                 hodnota = -1;
             }
 
+            // ak bola nastavena hodnota na -1 (zly vstup) vypise sa upozornenie
+            // a vyzva na zadanie spravnej hodnoty
+            // inak sa hodnota zapisa do hracieho pola a odosle na server
             if (hodnota == -1) {
                 printf("!! Policko je uz obsadene alebo si nezadal hodnotu z intervalu - (1-9) !!\n");
                 printf("Zadaj hodnotu v platnom intervale!\n");
@@ -183,7 +190,7 @@ void *odosli(void *data) {
                 }
 
                 d->hraciePole[policko] = 'X';
-                 (*d->pocetKrokov)++;
+                (*d->pocetKrokov)++;
                 d->vysledok = kontrola(d->hraciePole, 'X', *d->pocetKrokov);
 
                 printf("Pocet krokov: %d\n", *d->pocetKrokov);

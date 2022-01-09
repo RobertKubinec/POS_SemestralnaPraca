@@ -99,6 +99,8 @@ void *nacitaj(void *data) {
                 exit(1);
             }
 
+            // prehlada hracie pole ak sa znak zhodu zo vstupo tak ulozi
+            // do policka i na ktorom bol zhodny znak
             for (int i = 0; i < 9; ++i) {
                 if (*d->odpoved == d->hraciePole[i]) {
                     policko = i;
