@@ -4,13 +4,12 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/tmp/tmp.mD2OPtVYlZ/Client/Client.c" "/tmp/tmp.mD2OPtVYlZ/cmake-build-debug/CMakeFiles/Server.dir/Client/Client.c.o"
+  "/tmp/tmp.mD2OPtVYlZ/Client/Client.c" "/tmp/tmp.mD2OPtVYlZ/Client/cmake-build-debug/CMakeFiles/Client.dir/Client.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 
 # The include file search paths:
 set(CMAKE_C_TARGET_INCLUDE_PATH
-  "../Client"
   )
 
 # Targets to which this target links.

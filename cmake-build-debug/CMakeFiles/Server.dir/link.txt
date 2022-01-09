@@ -1,1 +1,1 @@
-/usr/bin/cc -g CMakeFiles/Server.dir/Server.c.o -o Server  -lpthread 
+/usr/bin/cc -g CMakeFiles/Server.dir/Client/Client.c.o -o Server  -lpthread 
