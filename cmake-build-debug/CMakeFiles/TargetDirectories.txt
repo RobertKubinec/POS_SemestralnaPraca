@@ -1,3 +1,0 @@
-/tmp/tmp.fdbF3E5ntD/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/tmp/tmp.fdbF3E5ntD/cmake-build-debug/CMakeFiles/edit_cache.dir
-/tmp/tmp.fdbF3E5ntD/cmake-build-debug/CMakeFiles/Server.dir
